@@ -42,9 +42,20 @@ export class VisionService {
     await receiptRepository.updateStatus(receiptId, 'PROCESSING');
 
     try {
-      // 2. Read optimized image file buffer from disk
-      const fullStoragePath = path.join(process.cwd(), receipt.storagePath.replace(/^\//, ''));
-      const imageBuffer = await fs.readFile(fullStoragePath);
+      // 2. Read optimized image file buffer (from Cloudinary or local disk fallback)
+      let imageBuffer: Buffer;
+      if (receipt.storagePath.startsWith('http://') || receipt.storagePath.startsWith('https://')) {
+        logger.info(`[VisionService] Downloading image from remote storage: ${receipt.storagePath}`);
+        const response = await fetch(receipt.storagePath);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch remote image from storage: ${response.status} ${response.statusText}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        imageBuffer = Buffer.from(arrayBuffer);
+      } else {
+        const fullStoragePath = path.join(process.cwd(), receipt.storagePath.replace(/^\//, ''));
+        imageBuffer = await fs.readFile(fullStoragePath);
+      }
 
       // 3. Extract raw data via Vision Provider
       const visionResponse = await this.visionProvider.extractReceiptData(
