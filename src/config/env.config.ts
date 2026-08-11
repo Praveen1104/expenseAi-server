@@ -7,7 +7,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(5000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   MONGODB_URI: z.string().default('mongodb://localhost:27017/smartspend'),
-  REDIS_URL: z.string().optional(),
+  REDIS_URL: z.string().default('redis://localhost:6379'),
   CORS_ORIGIN: z.string().default('http://localhost:3001'),
   OPENAI_API_KEY: z.string().optional().default('sk-placeholder-for-phase-1'),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(900000),

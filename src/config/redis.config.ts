@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { env } from './env.config.js';
 import { logger } from '../lib/logger.js';
 
@@ -74,22 +74,13 @@ export class RedisConfig {
         },
       };
 
-      if (env.REDIS_URL) {
-        this.client = new Redis(env.REDIS_URL, redisOptions);
-      } else {
-        this.client = new Redis({
-          host: env.REDIS_HOST,
-          port: env.REDIS_PORT,
-          password: env.REDIS_PASSWORD || undefined,
-          ...redisOptions,
-        });
-      }
+      this.client = new Redis(env.REDIS_URL, redisOptions);
 
       this.client.on('connect', () => {
         logger.info('Redis connected successfully');
       });
 
-      this.client.on('error', (err) => {
+      this.client.on('error', (err: any) => {
         logger.error('Redis error:', err.message);
       });
 
