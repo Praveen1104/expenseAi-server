@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
 import { logger } from '../lib/logger.js';
+import { env } from '../config/env.config.js';
 
 export interface StorageSaveResult {
   storagePath: string;
@@ -14,7 +15,9 @@ export class StorageService {
   private thumbnailsDir: string;
 
   constructor() {
-    this.baseDir = path.resolve(process.cwd(), 'uploads');
+    this.baseDir = path.isAbsolute(env.STORAGE_DIR) 
+      ? env.STORAGE_DIR 
+      : path.resolve(process.cwd(), env.STORAGE_DIR);
     this.receiptsDir = path.join(this.baseDir, 'receipts');
     this.thumbnailsDir = path.join(this.baseDir, 'thumbnails');
     this.ensureDirectories();
@@ -65,9 +68,13 @@ export class StorageService {
   public async deleteFile(relativePath: string): Promise<void> {
     if (!relativePath) return;
     try {
-      const fullPath = path.join(process.cwd(), relativePath.replace(/^\//, ''));
-      await fs.unlink(fullPath);
-      logger.info(`[StorageService] Deleted file at ${fullPath}`);
+      const normalized = relativePath.replace(/^\//, ''); // e.g. "uploads/receipts/filename.webp"
+      const resolvedPath = normalized.startsWith('uploads/')
+        ? path.join(this.baseDir, normalized.substring('uploads/'.length))
+        : path.resolve(process.cwd(), normalized);
+
+      await fs.unlink(resolvedPath);
+      logger.info(`[StorageService] Deleted file at ${resolvedPath}`);
     } catch (error) {
       logger.warn(`[StorageService] Failed to delete file at ${relativePath}:`, error);
     }
