@@ -16,6 +16,9 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().default('supersecretrefreshkey'),
   STORAGE_DIR: z.string().default(process.env.NODE_ENV === 'production' ? '/tmp/uploads' : 'uploads'),
   BYPASS_AUTH: z.string().default('false'),
+  CLOUDINARY_CLOUD_NAME: z.string().default('dhopqnmyr'),
+  CLOUDINARY_API_KEY: z.string().default('314486565747227'),
+  CLOUDINARY_API_SECRET: z.string().default('M4lB0aLsR4bMCPERe0B-fb2rCZ0'),
 }).refine((data) => {
   // In production, reject default development secrets
   if (data.NODE_ENV === 'production') {
