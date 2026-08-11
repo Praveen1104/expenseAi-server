@@ -15,6 +15,7 @@ const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().default('supersecretaccesskey'),
   JWT_REFRESH_SECRET: z.string().default('supersecretrefreshkey'),
   STORAGE_DIR: z.string().default(process.env.NODE_ENV === 'production' ? '/tmp/uploads' : 'uploads'),
+  BYPASS_AUTH: z.string().default('false'),
 }).refine((data) => {
   // In production, reject default development secrets
   if (data.NODE_ENV === 'production') {
